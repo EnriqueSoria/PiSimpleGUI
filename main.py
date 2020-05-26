@@ -1,16 +1,14 @@
 from gui import Outputs
 from integrations.temp_sensor.lm75 import LM75
+from integrations.temp_sensor.mockup import LM75 as LM75Mockup
 
 
-def get_temp():
+def get_sensor():
     """ Get temperature in celsius"""
     try:
-        sensor = LM75()
-        return sensor.get_temp()
+        return LM75()
     except PermissionError as e:
-        print(str(e))
-    # TODO: remove this line
-    return 27
+        return LM75Mockup()
 
 
 import PySimpleGUI as sg
@@ -22,12 +20,13 @@ layout = [
 ]
 
 window = sg.Window('PiSimpleGUI', layout)
+sensor = get_sensor()
 
 while True:
     event, values = window.read(timeout=100)
 
     if event in (None, 'Exit'):
         break
-    window[Outputs.TEMPERATURE].update(get_temp())
+    window[Outputs.TEMPERATURE].update(sensor.get_temp())
 
 window.close()
