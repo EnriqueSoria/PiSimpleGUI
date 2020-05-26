@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 smbus2 = "*"
 pysimplegui = "*"
+paho-mqtt = "*"
 
 [dev-packages]
 

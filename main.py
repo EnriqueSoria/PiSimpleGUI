@@ -6,47 +6,16 @@
 #   as to exactly which package is being used.  It's purely for educational and explicitness purposes
 import queue
 import threading
-import time
-import itertools
+import paho.mqtt.client as mqtt
 
 import PySimpleGUI as sg
 
-from gui import Outputs
-from integrations.temp_sensor.lm75 import LM75
-
-"""
-    DESIGN PATTERN - Multithreaded GUI
-    One method for running multiple threads in a PySimpleGUI environment.
-    The PySimpleGUI code, and thus the underlying GUI framework, runs as the primary, main thread
-    Other parts of the software are implemented as threads
-
-    A queue.Queue is used by the worker threads to communicate with code that calls PySimpleGUI directly.
-    The PySimpleGUI code is structured just like a typical PySimpleGUI program.  A layout defined,
-        a Window is created, and an event loop is executed.
-    What's different is that within this otherwise normal PySimpleGUI Event Loop, there is a check for items
-        in the Queue.  If there are items found, process them by making GUI changes, and continue.
-
-    This design pattern works for all of the flavors of PySimpleGUI including the Web and also repl.it
-    You'll find a repl.it version here: https://repl.it/@PySimpleGUI/Async-With-Queue-Communicationspy
-"""
+from gui import Outputs, layout
+from integrations.temp_sensor import get_sensor
+from integrations.temp_sensor.worker import read_temp
 
 
-def worker_thread(sensor, run_freq, gui_queue):
-    """
-    A worker thrread that communicates with the GUI
-    These threads can call functions that block withouth affecting the GUI (a good thing)
-    Note that this function is the code started as each thread. All threads are identical in this way
-    :param sensor: Temperature sensor
-    :param run_freq: How often the thread should run in milliseconds
-    :param gui_queue: Queue used to communicate with the GUI
-    :return:
-    """
-    while True:
-        time.sleep(run_freq / 1000)  # sleep for a while
-        gui_queue.put(sensor.get_temp())
-
-
-def the_gui(gui_queue):
+def the_gui(layout, gui_queue):
     """
     Starts and executes the GUI
     Reads data from a Queue and displays the data to the window
@@ -55,10 +24,6 @@ def the_gui(gui_queue):
     :param gui_queue: Queue the GUI should read from
     :return:
     """
-    layout = [
-        [sg.Text('Temperatura: '), sg.Text(size=(15, 1), key=Outputs.TEMPERATURE)],
-    ]
-
     window = sg.Window('Multithreaded Window').Layout(layout)
     # --------------------- EVENT LOOP ---------------------
     while True:
@@ -73,29 +38,38 @@ def the_gui(gui_queue):
                 break  # break from the loop if no more messages are queued up
             # if message received from queue, display the message in the Window
             if message:
-                window.Element(Outputs.TEMPERATURE).Update(message)
+                for key, value in message.items():
+                    window.Element(key).Update(value)
                 window.Refresh()  # do a refresh because could be showing multiple messages before next Read
 
     # if user exits the window, then close the window and exit the GUI func
     window.Close()
 
 
-from integrations.temp_sensor.mockup import LM75 as LM75Mockup
+def mqtt_receiver(client, userdata, message):
+    gui_queue.put({
+        Outputs.CURRENT_SONG: message.payload.decode("utf-8")
+    })
 
 
-def get_sensor():
-    """ Get temperature in celsius"""
-    try:
-        return LM75()
-    except PermissionError as e:
-        return LM75Mockup()
+def get_client(gui_queue, topic='#', client_name='test', client_host='192.168.0.175'):
+    client = mqtt.Client(client_name)
+    client.connect(client_host)
+    client.on_message = mqtt_receiver
+    return client
+
+
+def mqtt_worker(client, topic='#'):
+    client.loop_start()
+    client.subscribe(topic)
 
 
 if __name__ == '__main__':
     # -- Create a Queue to communicate with GUI --
     gui_queue = queue.Queue()  # queue used to communicate between the gui and the threads
     # -- Start worker threads, one runs twice as often as the other
-    threading.Thread(target=worker_thread, args=(get_sensor(), 500, gui_queue,), daemon=True).start()
+    threading.Thread(target=read_temp, args=(get_sensor(), 5000, gui_queue,), daemon=True).start()
+    threading.Thread(target=mqtt_worker, args=(get_client(gui_queue),), daemon=True).start()
     # -- Start the GUI passing in the Queue --
-    the_gui(gui_queue)
+    the_gui(layout(sg), gui_queue)
     print('Exiting Program')
