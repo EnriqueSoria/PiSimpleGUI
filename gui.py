@@ -11,7 +11,9 @@ class Outputs(Enum):
 
 
 def layout(sg):
+    font = (sg.DEFAULT_FONT[0], 40)
+
     return [
-        [sg.Text('Temperatura: '), sg.Text(size=(30, 1), key=Outputs.TEMPERATURE)],
-        [sg.Text('Current song: '), sg.Text(size=(30, 1), key=Outputs.CURRENT_SONG)],
+        [sg.Text('Temperatura: ', font=font,), sg.Text(size=(30, 1), font=font, key=Outputs.TEMPERATURE)],
+        [sg.Text('Current song: ', font=font,), sg.Text(size=(30, 1), font=font, key=Outputs.CURRENT_SONG)],
     ]
