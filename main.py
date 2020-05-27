@@ -52,7 +52,7 @@ def mqtt_receiver(client, userdata, message):
     })
 
 
-def get_client(gui_queue, topic='#', client_name='test', client_host='192.168.0.175'):
+def get_client(gui_queue, topic='#', client_name='test', client_host='localhost'):
     client = mqtt.Client(client_name)
     client.connect(client_host)
     client.on_message = mqtt_receiver
