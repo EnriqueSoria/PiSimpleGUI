@@ -24,7 +24,15 @@ def the_gui(layout, gui_queue):
     :param gui_queue: Queue the GUI should read from
     :return:
     """
-    window = sg.Window('Multithreaded Window').Layout(layout)
+    sg.set_options(border_width=0)
+    window = sg.Window(
+        'Multithreaded Window',
+        no_titlebar=True,
+        grab_anywhere=True,
+        size=(1000, 600)
+    )
+    window = window.Layout(layout)
+
     # --------------------- EVENT LOOP ---------------------
     while True:
         event, values = window.Read(timeout=100)  # wait for up to 100 ms for a GUI event
@@ -53,10 +61,13 @@ def mqtt_receiver(client, userdata, message):
 
 
 def get_client(gui_queue, topic='#', client_name='test', client_host='localhost'):
-    client = mqtt.Client(client_name)
-    client.connect(client_host)
-    client.on_message = mqtt_receiver
-    return client
+    try:
+        client = mqtt.Client(client_name)
+        client.connect(client_host)
+        client.on_message = mqtt_receiver
+        return client
+    except ConnectionRefusedError as e:
+        print(e)
 
 
 def mqtt_worker(client, topic='#'):
@@ -67,9 +78,15 @@ def mqtt_worker(client, topic='#'):
 if __name__ == '__main__':
     # -- Create a Queue to communicate with GUI --
     gui_queue = queue.Queue()  # queue used to communicate between the gui and the threads
-    # -- Start worker threads, one runs twice as often as the other
-    threading.Thread(target=read_temp, args=(get_sensor(), 5000, gui_queue,), daemon=True).start()
-    threading.Thread(target=mqtt_worker, args=(get_client(gui_queue),), daemon=True).start()
+
+    # -- Start worker threads
+    temp_sensor = get_sensor()
+    threading.Thread(target=read_temp, args=(temp_sensor, 5000, gui_queue,), daemon=True).start()
+
+    mqtt_client = get_client(gui_queue)
+    if mqtt_client:
+        threading.Thread(target=mqtt_worker, args=(mqtt_client,), daemon=True).start()
+
     # -- Start the GUI passing in the Queue --
     the_gui(layout(sg), gui_queue)
     print('Exiting Program')
