@@ -40,7 +40,7 @@ def the_gui(layout, gui_queue):
             break
 
         if event == Inputs.PLAY_PAUSE_SONG:
-            publish(client=mqtt, topic='music', message='play/pause')
+            publish(client=mqtt_client, topic='music', message='play/pause')
 
 
         # --------------- Loop through all messages coming in from threads ---------------
