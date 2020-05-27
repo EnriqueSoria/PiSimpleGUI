@@ -15,5 +15,5 @@ def layout(sg):
 
     return [
         [sg.Text('Temperatura: ', font=font,), sg.Text(size=(30, 1), font=font, key=Outputs.TEMPERATURE)],
-        [sg.Text('Current song: ', font=font,), sg.Text(size=(30, 1), font=font, key=Outputs.CURRENT_SONG)],
+        [sg.Text('Sonant ara: ', font=font,), sg.Text(size=(30, 1), font=font, key=Outputs.CURRENT_SONG)],
     ]
