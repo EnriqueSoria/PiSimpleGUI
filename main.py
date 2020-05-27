@@ -10,7 +10,7 @@ import paho.mqtt.client as mqtt
 
 import PySimpleGUI as sg
 
-from gui import Outputs, layout
+from gui import Outputs, layout, Inputs
 from integrations.temp_sensor import get_sensor
 from integrations.temp_sensor.worker import read_temp
 
@@ -38,6 +38,11 @@ def the_gui(layout, gui_queue):
         event, values = window.Read(timeout=100)  # wait for up to 100 ms for a GUI event
         if event is None or event == 'Exit':
             break
+
+        if event == Inputs.PLAY_PAUSE_SONG:
+            publish(client=mqtt, topic='music', message='play/pause')
+
+
         # --------------- Loop through all messages coming in from threads ---------------
         while True:  # loop executes until runs out of messages in Queue
             try:  # see if something has been posted to Queue
@@ -58,6 +63,9 @@ def mqtt_receiver(client, userdata, message):
     gui_queue.put({
         Outputs.CURRENT_SONG: message.payload.decode("utf-8")
     })
+
+def publish(client, topic, message):
+    client.publish(topic, message)
 
 
 def get_client(gui_queue, topic='#', client_name='test', client_host='localhost'):
