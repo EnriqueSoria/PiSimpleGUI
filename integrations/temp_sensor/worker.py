@@ -1,6 +1,6 @@
 import time
 
-from gui import Outputs
+from gui.enumerations import Outputs
 
 
 def read_temp(sensor, run_freq, gui_queue):
