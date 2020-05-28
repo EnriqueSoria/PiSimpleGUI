@@ -13,9 +13,9 @@ def layout(sg):
     MUSIC_ROWS = [
         [sg.Text('Sonant ara: ', font=font, ), sg.Text(size=(30, 1), font=font, key=Outputs.CURRENT_SONG)],
         [
-            sg.Button('<|', key=Inputs.PREVIOUS_SONG),
-            sg.Button('||', key=Inputs.PLAY_PAUSE_SONG),
-            sg.Button('|>', Inputs.NEXT_SONG),
+            sg.Button('<|', font=font, key=Inputs.PREVIOUS_SONG),
+            sg.Button('||', font=font, key=Inputs.PLAY_PAUSE_SONG),
+            sg.Button('|>', font=font, key=Inputs.NEXT_SONG),
         ]
     ]
 
