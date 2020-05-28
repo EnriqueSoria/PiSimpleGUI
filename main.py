@@ -6,6 +6,8 @@
 #   as to exactly which package is being used.  It's purely for educational and explicitness purposes
 import queue
 import threading
+
+import arrow as arrow
 import paho.mqtt.client as mqtt
 
 import PySimpleGUI as sg
@@ -15,7 +17,7 @@ from integrations.temp_sensor import get_sensor
 from integrations.temp_sensor.worker import read_temp
 
 
-def the_gui(layout, gui_queue):
+def the_gui(layout, gui_queue, **kwargs):
     """
     Starts and executes the GUI
     Reads data from a Queue and displays the data to the window
@@ -24,6 +26,8 @@ def the_gui(layout, gui_queue):
     :param gui_queue: Queue the GUI should read from
     :return:
     """
+    mqtt_client = kwargs.pop('mqtt_client')
+
     sg.set_options(border_width=0)
     window = sg.Window(
         'Multithreaded Window',
@@ -39,9 +43,19 @@ def the_gui(layout, gui_queue):
         if event is None or event == 'Exit':
             break
 
-        if event == Inputs.PLAY_PAUSE_SONG:
-            publish(client=mqtt_client, topic='music', message='play/pause')
+        # -------------------
+        if mqtt_client and event == Inputs.PLAY_PAUSE_SONG:
+            message = 'pause' if window[Outputs.CURRENT_SONG] else 'play'
+            publish(
+                client=mqtt_client,
+                topic='music/state/change',
+                message=message
+            )
 
+        # -------------------
+        now = arrow.now().time()
+        now = now.strftime("%H:%M")
+        window.Element(Outputs.NOW).Update(now)
 
         # --------------- Loop through all messages coming in from threads ---------------
         while True:  # loop executes until runs out of messages in Queue
@@ -60,11 +74,14 @@ def the_gui(layout, gui_queue):
 
 
 def mqtt_receiver(client, userdata, message):
+    print(userdata, message)
     gui_queue.put({
         Outputs.CURRENT_SONG: message.payload.decode("utf-8")
     })
 
+
 def publish(client, topic, message):
+    print(f'publishing to {client._host} -> {message}')
     client.publish(topic, message)
 
 
@@ -91,10 +108,10 @@ if __name__ == '__main__':
     temp_sensor = get_sensor()
     threading.Thread(target=read_temp, args=(temp_sensor, 5000, gui_queue,), daemon=True).start()
 
-    mqtt_client = get_client(gui_queue)
+    mqtt_client = get_client(gui_queue, client_host='192.168.43.174')
     if mqtt_client:
         threading.Thread(target=mqtt_worker, args=(mqtt_client,), daemon=True).start()
 
     # -- Start the GUI passing in the Queue --
-    the_gui(layout(sg), gui_queue)
+    the_gui(layout(sg), gui_queue, mqtt_client=mqtt_client)
     print('Exiting Program')

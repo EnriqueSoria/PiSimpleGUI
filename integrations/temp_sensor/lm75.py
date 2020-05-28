@@ -1,4 +1,5 @@
 import smbus2
+import random
 
 LM75_ADDRESS = 0x48
 
@@ -33,3 +34,9 @@ class LM75(object):
         raw = self._bus.read_word_data(self._address, LM75_TEMP_REGISTER) & 0xFFFF
         raw = ((raw << 8) & 0xFF00) + (raw >> 8)
         return self.to_celsius(self.regdata2float(raw))
+
+
+class MockupLM75:
+
+    def get_temp(self, celsius=True):
+        return random.randrange(2500, 2790) / 100
