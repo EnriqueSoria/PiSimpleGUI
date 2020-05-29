@@ -3,28 +3,35 @@ from integrations.mqtt.utils import publish
 
 
 def next(window, event, *args, **kwargs):
-    pass
+    publish(
+        topic='music/state/change/next',
+        message=''
+    )
 
 
 def prev(window, event, *args, **kwargs):
-    pass
+    publish(
+        topic='music/state/change/prev',
+        message=''
+    )
 
 
 def play(window, event, *args, **kwargs):
-    pass
+    publish(
+        topic='music/state/change/play',
+        message=''
+    )
 
 
 def pause(window, event, *args, **kwargs):
-    pass
+    publish(
+        topic='music/state/change/play',
+        message=''
+    )
 
 
 def play_pause(window, event, *args, **kwargs):
-    text = window.Element(Outputs.CURRENT_SONG).DisplayText
-    message = 'play' if text in ('', 'pause') else 'pause'
-    publish(
-        topic='music/state/change',
-        message=message
-    )
+    play(window, event, *args, **kwargs)
 
 
 music_events = {
