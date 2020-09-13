@@ -24,4 +24,5 @@ def layout(sg):
         *DATETIME_ROWS,
         *MUSIC_ROWS,
         *TEMPERATURE_ROWS,
+        [sg.Exit()],
     ]

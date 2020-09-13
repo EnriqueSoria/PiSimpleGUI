@@ -23,8 +23,10 @@ def the_gui(gui_queue, **kwargs):
         layout=layout(sg),
         no_titlebar=True,
         element_justification='center',
-        size=(1000, 600),
+        size=(1024, 800),
+        finalize=True
     )
+    window.maximize()
 
     # --------------------- EVENT LOOP ---------------------
     while True:
