@@ -21,12 +21,9 @@ def the_gui(gui_queue, **kwargs):
     window = sg.Window(
         'Multithreaded Window',
         no_titlebar=True,
-        grab_anywhere=True,
         size=(1000, 600)
     )
     window = window.Layout(layout(sg))
-
-
 
     # --------------------- EVENT LOOP ---------------------
     while True:
