@@ -15,6 +15,7 @@ def read_temp(sensor, run_freq, gui_queue):
     """
     while True:
         time.sleep(run_freq / 1000)  # sleep for a while
+        temp = sensor.get_temp()
         gui_queue.put({
-            Outputs.TEMPERATURE: sensor.get_temp()
+            Outputs.TEMPERATURE: f"{temp:.2f}°"
         })
