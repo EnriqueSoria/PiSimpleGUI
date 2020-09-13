@@ -20,15 +20,16 @@ def the_gui(gui_queue, **kwargs):
     sg.set_options(border_width=0)
     window = sg.Window(
         'Multithreaded Window',
+        layout=layout(sg),
         no_titlebar=True,
-        size=(1000, 600)
+        element_justification='center',
+        size=(1000, 600),
     )
-    window = window.Layout(layout(sg))
 
     # --------------------- EVENT LOOP ---------------------
     while True:
         event, values = window.Read(timeout=100)  # wait for up to 100 ms for a GUI event
-        if event is None or event == 'Exit':
+        if event in (None, 'Exit'):
             break
 
         # -------------------
