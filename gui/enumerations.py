@@ -11,3 +11,4 @@ class Outputs(Enum):
     TEMPERATURE = auto()
     CURRENT_SONG = auto()
     NOW = auto()
+    TODAY_VISITS = auto()

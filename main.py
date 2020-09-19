@@ -5,9 +5,11 @@ import threading
 
 from gui.enumerations import Outputs
 from gui.main import the_gui
+from integrations.api_calls.calls import api_calls
 from integrations.mqtt.utils import mqtt_sub_worker
 from integrations.temp_sensor import get_sensor
 from integrations.temp_sensor.worker import read_temp
+from settings import VISIT_COUNT_FREQ
 
 
 def mqtt_receiver(client, userdata, message):
@@ -24,6 +26,9 @@ if __name__ == '__main__':
     # -- Start worker threads
     temp_sensor = get_sensor()
     threading.Thread(target=read_temp, args=(temp_sensor, 5000, gui_queue,), daemon=True).start()
+
+    # -- API calls
+    threading.Thread(target=api_calls, args=(VISIT_COUNT_FREQ, gui_queue,), daemon=True).start()
 
     mqtt_subscriber = threading.Thread(
         target=mqtt_sub_worker,

@@ -9,6 +9,7 @@ pysimplegui = "*"
 paho-mqtt = "*"
 arrow = "*"
 python-decouple = "*"
+requests = "*"
 
 [dev-packages]
 

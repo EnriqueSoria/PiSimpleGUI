@@ -19,11 +19,15 @@ def layout(sg):
             sg.Button('ᐅ', font=font, key=Inputs.NEXT_SONG),
         ]
     ]
+    FESTIWIKI_ROWS = [
+        [sg.Text('----', size=(30, 1), font=font, justification="center", key=Outputs.TODAY_VISITS)]
+    ]
 
     return [
         [],[],
         *DATETIME_ROWS,
         *MUSIC_ROWS,
         *TEMPERATURE_ROWS,
+        *FESTIWIKI_ROWS,
         [sg.Exit()],
     ]
