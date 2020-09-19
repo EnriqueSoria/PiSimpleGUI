@@ -12,7 +12,9 @@ def visit_count():
     }
     r = requests.post(url=VISIT_COUNT_API, data=data)
 
-    return r.json().get("count", "error")
+    count = r.json().get("count", "error")
+
+    return f"Visites hui: {count}"
 
 
 def api_calls(run_freq: int, gui_queue):
