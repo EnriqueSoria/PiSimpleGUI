@@ -5,16 +5,26 @@ from gui.enumerations import Outputs
 from settings import VISIT_COUNT_API, VISIT_COUNT_TOKEN
 
 
-def visit_count():
-    data = {
-        "when": "today",
-        "token": VISIT_COUNT_TOKEN
-    }
-    r = requests.post(url=VISIT_COUNT_API, data=data)
+class VisitCount:
+    class Error(Exception):
+        ...
 
-    count = r.json().get("count", "error")
+    @staticmethod
+    def run() -> dict:
+        try:
+            data = {
+                "when": "today",
+                "token": VISIT_COUNT_TOKEN
+            }
+            r = requests.post(url=VISIT_COUNT_API, data=data)
 
-    return f"Visites hui: {count}"
+            count = r.json().get("count", "error")
+
+            return {
+                Outputs.TODAY_VISITS: f"Visites hui: {count}"
+            }
+        except requests.exceptions.ConnectionError as err:
+            raise VisitCount.Error() from err
 
 
 def api_calls(run_freq: int, gui_queue):
@@ -29,6 +39,7 @@ def api_calls(run_freq: int, gui_queue):
     while True:
         time.sleep(run_freq)  # sleep for a while
 
-        gui_queue.put({
-            Outputs.TODAY_VISITS: visit_count()
-        })
+        try:
+            gui_queue.put(VisitCount.run())
+        except VisitCount.Error:
+            ...

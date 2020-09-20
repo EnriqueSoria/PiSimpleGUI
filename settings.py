@@ -10,3 +10,5 @@ MQTT_SERVER = config('MQTT_SERVER', default='localhost')
 VISIT_COUNT_API = config("VISIT_COUNT_API")
 VISIT_COUNT_TOKEN = config("VISIT_COUNT_TOKEN")
 VISIT_COUNT_FREQ = config("VISIT_COUNT_FREQ", 60, cast=int)
+
+GRAB_ANYWHERE = config("GRAB_ANYWHERE", default=False, cast=bool)

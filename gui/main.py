@@ -6,6 +6,7 @@ import arrow
 from gui.enumerations import Outputs
 from gui.event_handlers import handler
 from gui.layout import layout
+from settings import GRAB_ANYWHERE
 
 
 def the_gui(gui_queue, **kwargs):
@@ -24,7 +25,8 @@ def the_gui(gui_queue, **kwargs):
         no_titlebar=True,
         element_justification='center',
         size=(1024, 800),
-        finalize=True
+        finalize=True,
+        grab_anywhere=GRAB_ANYWHERE,
     )
     window.maximize()
 
